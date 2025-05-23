@@ -1,0 +1,28 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.example.myapp"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+dependencies {
+    implementation project(':base')
+    implementation project(':lib_network')
+    implementation project(':feature_home')
+    implementation project(':feature_user')
+    implementation project(':feature_login')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
