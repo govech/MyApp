@@ -7,7 +7,22 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <!-- 可在此注册主 Activity 或其他组件 -->
+        android:theme="@style/AppTheme">
+        
+        <!-- 启动页 -->
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- 主页面 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
 </manifest>
