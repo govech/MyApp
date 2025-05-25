@@ -1,15 +1,14 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    // Kotlin KAPT插件，用于处理注解处理器
-    id 'kotlin-kapt'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.example.myapp'
+    compileSdk libs.versions.compileSdk.get().toInteger()
     defaultConfig {
         applicationId "com.example.myapp"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk libs.versions.minSdk.get().toInteger()
+        targetSdk libs.versions.targetSdk.get().toInteger()
         versionCode 1
         versionName "1.0"
     }
@@ -20,11 +19,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 }
 dependencies {
