@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    // Kotlin KAPT插件，用于处理注解处理器
+    id 'kotlin-kapt'
 }
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -31,4 +33,5 @@ dependencies {
     implementation project(':feature_home')
     implementation project(':feature_user')
     implementation project(':feature_login')
+
 }

@@ -10,6 +10,9 @@ android {
         versionCode 1
         versionName "1.0"
         consumerProguardFiles 'consumer-rules.pro'
+
+        // 添加一个字符串类型的字段  智普ai https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys
+        buildConfigField "String", "ZHIPU_API_KEY", "\"c65ebf3ef17e4efa8fc38ba8d0c3dccf.ahifKM1rscpOe8Hb\""
     }
     buildTypes {
         release {
@@ -17,10 +20,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildFeatures.buildConfig = true
 }
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation project(':base')
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
 }

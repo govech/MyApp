@@ -3,20 +3,30 @@ buildscript {
     ext {
         kotlin_version = '1.8.0'
         compileSdkVersion = 34
-        minSdkVersion = 21
+        minSdkVersion = 23
         targetSdkVersion = 34
+
+        // 设置协程版本
+        coroutinesVersion = "1.7.3"
+        // 设置生命周期组件版本
+        lifecycleVersion = "2.4.0"
+        // 设置Room版本
+        roomVersion = "2.5.0"
+        agp_version = '7.4.2'
     }
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.2'
+        classpath "com.android.tools.build:gradle:$agp_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 allprojects {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
         google()
         mavenCentral()
     }
