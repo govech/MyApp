@@ -12,8 +12,15 @@ android {
         versionName "1.0"
         consumerProguardFiles 'consumer-rules.pro'
 
-        // 从 gradle.properties 读取 ZHIPU_API_KEY
-        def zhipuApiKey = project.properties['ZHIPU_API_KEY'] ?: ""
+        // 从 local.properties 读取 ZHIPU_API_KEY
+        Properties localProps = new Properties()
+        File localPropsFile = project.rootProject.file('local.properties')
+        if (localPropsFile.exists()) {
+            localPropsFile.withInputStream { stream ->
+                localProps.load(stream)
+            }
+        }
+        def zhipuApiKey = localProps.getProperty('ZHIPU_API_KEY', '')
         buildConfigField "String", "ZHIPU_API_KEY", "\"${zhipuApiKey}\""
     }
     buildTypes {
