@@ -32,3 +32,4 @@ Thumbs.db
 .externalNativeBuild/
 .cxx/
 local.properties
+gradle.properties
