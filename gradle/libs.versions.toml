@@ -5,7 +5,7 @@ minSdk = "23"
 targetSdk = "34"
 
 # Kotlin
-kotlin = "1.8.0"
+kotlin = "1.9.24"
 kotlinx-coroutines = "1.7.3"
 
 # Android Gradle Plugin
@@ -38,6 +38,7 @@ okhttp-logging = "4.11.0"              # 对齐版本
 # 工具库
 xlog = "1.11.1"
 mmkv = "1.3.14"
+arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
 
 [libraries]
 # Kotlin
@@ -83,6 +84,10 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 xlog = { group = "com.elvishew", name = "xlog", version.ref = "xlog" }
 mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
 
+# ARouter
+arouter-api = { group = "com.alibaba", name = "arouter-api", version.ref = "arouter" }
+arouter-compiler = { group = "com.alibaba", name = "arouter-compiler", version.ref = "arouter" }
+
 [bundles]
 # 协程
 coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
@@ -104,3 +109,4 @@ android-test = ["androidx-test-junit", "androidx-test-espresso"]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt" }

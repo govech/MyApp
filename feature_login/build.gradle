@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 android {
     namespace 'com.example.feature_login'
@@ -25,8 +26,20 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.getName())
+        }
+    }
 }
 dependencies {
     implementation project(':base')
     implementation project(':lib_network')
+    kapt libs.arouter.compiler
 }
+

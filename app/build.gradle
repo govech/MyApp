@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 android {
     namespace 'com.example.myapp'
@@ -25,6 +26,14 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.getName())
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 dependencies {
     implementation project(':base')
@@ -32,5 +41,7 @@ dependencies {
     implementation project(':feature_home')
     implementation project(':feature_user')
     implementation project(':feature_login')
+    kapt libs.arouter.compiler
 
 }
+

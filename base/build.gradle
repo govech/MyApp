@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 android {
     namespace 'com.example.base'
@@ -26,6 +27,12 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.getName())
+        }
+    }
 }
 dependencies {
     implementation libs.kotlin.stdlib
@@ -49,4 +56,7 @@ dependencies {
 
     api libs.mmkv
 
+    // ARouter
+    api libs.arouter.api
+    kapt libs.arouter.compiler
 }
