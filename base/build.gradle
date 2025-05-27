@@ -28,6 +28,10 @@ android {
         jvmTarget = '11'
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     kapt {
         arguments {
             arg("AROUTER_MODULE_NAME", project.getName())
