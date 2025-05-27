@@ -2,11 +2,12 @@ package com.example.feature_login
 
 import android.os.Bundle
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import com.alibaba.android.arouter.facade.annotation.Route
+import com.example.base.BaseActivity
+import com.example.constant.RouterPath
 
-@Route(path = "/app/login")
-class LoginActivity : AppCompatActivity() {
+@Route(path = RouterPath.Login.LOGIN_ACTIVITY)
+class LoginActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)

@@ -38,6 +38,7 @@ okhttp-logging = "4.11.0"              # 对齐版本
 # 工具库
 xlog = "1.11.1"
 mmkv = "1.3.14"
+gson = "2.13.1"
 arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
 
 [libraries]
@@ -83,6 +84,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 # 工具库
 xlog = { group = "com.elvishew", name = "xlog", version.ref = "xlog" }
 mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # ARouter
 arouter-api = { group = "com.alibaba", name = "arouter-api", version.ref = "arouter" }

@@ -1,11 +1,10 @@
 package com.example.myapp
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.example.feature_login.LoginActivity
+import com.example.utils.ktx.startActivityKt
 
 class SplashActivity : AppCompatActivity() {
     
@@ -17,7 +16,7 @@ class SplashActivity : AppCompatActivity() {
         
         // 延迟跳转到登录页面
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivityKt<MainActivity>()
             finish()
         }, SPLASH_DELAY)
     }

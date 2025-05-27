@@ -60,6 +60,8 @@ dependencies {
 
     api libs.mmkv
 
+    api libs.gson
+
     // ARouter
     api libs.arouter.api
     kapt libs.arouter.compiler
