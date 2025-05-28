@@ -2,22 +2,22 @@ package com.example.data
 
 
 import com.example.data.model.UserInfo
-import com.google.gson.Gson
 import com.tencent.mmkv.MMKV
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 object UserManager {
     private const val KEY_USER_INFO = "user_info"
     private val mmkv by lazy { MMKV.defaultMMKV() }
-    private val gson = Gson()
 
     fun saveUser(userInfo: UserInfo) {
-        val json = gson.toJson(userInfo)
+        val json = Json.encodeToString(userInfo)
         mmkv.encode(KEY_USER_INFO, json)
     }
 
     fun getUser(): UserInfo? {
         val json = mmkv.decodeString(KEY_USER_INFO)
-        return if (json.isNullOrEmpty()) null else gson.fromJson(json, UserInfo::class.java)
+        return if (json.isNullOrEmpty()) null else Json.decodeFromString<UserInfo>(json)
     }
 
     fun getToken(): String? = getUser()?.token

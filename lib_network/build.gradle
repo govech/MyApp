@@ -41,4 +41,6 @@ android {
 dependencies {
     implementation project(':base')
     implementation libs.bundles.network
+    implementation libs.kotlinx.serialization.converter
+
 }

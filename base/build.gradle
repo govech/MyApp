@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.serialization)
 }
 android {
     namespace 'com.example.base'
@@ -60,10 +61,13 @@ dependencies {
 
     api libs.mmkv
 
-    api libs.gson
+//    api libs.gson
 
     // ARouter
     api libs.arouter.api
     kapt libs.arouter.compiler
     api libs.titlebar
+
+    // Kotlinx Serialization JSON
+    api libs.kotlinx.serialization.json
 }

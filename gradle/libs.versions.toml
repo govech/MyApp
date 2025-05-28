@@ -41,6 +41,8 @@ mmkv = "1.3.14"
 gson = "2.13.1"
 arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
 titlebar = "10.6"
+serialization = "1.6.0"
+converter = "1.0.0"
 
 [libraries]
 # Kotlin
@@ -71,6 +73,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 
+
 # 测试
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
@@ -86,7 +89,8 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 xlog = { group = "com.elvishew", name = "xlog", version.ref = "xlog" }
 mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "converter" }
 titlebar = { group = "com.github.getActivity", name = "TitleBar", version.ref = "titlebar" }
 
 # ARouter
@@ -115,3 +119,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
