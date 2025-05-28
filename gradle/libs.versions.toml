@@ -43,9 +43,11 @@ arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
 titlebar = "10.6"
 serialization = "1.6.0"
 converter = "1.0.0"
+coil = "2.4.0"
 
 [libraries]
 # Kotlin
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }

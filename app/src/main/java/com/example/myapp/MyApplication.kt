@@ -6,6 +6,8 @@ import com.elvishew.xlog.XLog
 import com.elvishew.xlog.printer.AndroidPrinter
 import com.tencent.mmkv.MMKV
 import com.alibaba.android.arouter.launcher.ARouter
+import com.example.image.ImageLoader
+import com.example.image.impl.CoilImageLoader
 import com.example.utils.NightModeUtils
 
 class MyApplication : Application() {
@@ -34,6 +36,7 @@ class MyApplication : Application() {
     private fun initThirdPartyLibs() {
         // 初始化第三方库
         // 例如：图片加载库、日志库、崩溃收集等
+        ImageLoader.init(CoilImageLoader())
         XLog.init(
             LogLevel.ALL, AndroidPrinter()
         )

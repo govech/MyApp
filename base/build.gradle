@@ -70,4 +70,6 @@ dependencies {
 
     // Kotlinx Serialization JSON
     api libs.kotlinx.serialization.json
+
+    implementation libs.coil
 }
