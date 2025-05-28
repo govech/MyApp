@@ -65,4 +65,5 @@ dependencies {
     // ARouter
     api libs.arouter.api
     kapt libs.arouter.compiler
+    api libs.titlebar
 }

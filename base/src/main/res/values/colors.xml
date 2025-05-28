@@ -9,7 +9,7 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="divider">#BDBDBD</color>
-    <color name="background">#F5F5F5</color>
+    <color name="background">#FFFFFF</color>
     <color name="error">#D32F2F</color>
     <color name="success">#388E3C</color>
     <color name="warning">#FFA000</color>

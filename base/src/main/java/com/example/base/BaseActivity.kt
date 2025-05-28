@@ -40,18 +40,18 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private fun initStatusBar() {
         initWindowController()
-        setNavigationBarColor(Color.TRANSPARENT)
-
-        // 设置透明状态栏+深色文字
-        setTransparentStatusBar(darkText = true)
-        // 设置渐变状态栏
+        windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+//
+//        // 设置透明状态栏+深色文字
+//        setTransparentStatusBar(darkText = true)
+//        // 设置渐变状态栏
 //        setGradientStatusBar(intArrayOf(Color.YELLOW, Color.BLUE))
-        // 设置全屏模式（隐藏导航栏，滑动不显示系统栏）
-        setFullScreen(hideNavigationBar = true)
-        // 修改状态栏颜色
-        setStatusBarColor(this.color(R.color.primary)) // 半透明红色
-        // 显示系统状态栏
-        showSystemBars()
+//        // 设置全屏模式（隐藏导航栏，滑动不显示系统栏）
+//        setFullScreen(hideNavigationBar = true)
+//        // 修改状态栏颜色
+//        setStatusBarColor(this.color(R.color.primary))
+//        // 显示系统状态栏
+//        showSystemBars()
     }
 
     /**
@@ -82,8 +82,12 @@ abstract class BaseActivity : AppCompatActivity() {
      * 初始化窗口控制器
      */
     private fun initWindowController() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        /**
+         * 表示让系统自动处理系统窗口区域（如状态栏和导航栏）的布局，防止内容被遮挡。
+         * 设置为 true 时，系统会为内容区域添加相应的 padding，避免与系统 UI 重叠
+         * 设置为false 时，系统会隐藏内容区域与系统 UI 的重叠部分(内容会被遮挡)
+         */
+        WindowCompat.setDecorFitsSystemWindows(window, true)
     }
 
     /**
@@ -105,13 +109,7 @@ abstract class BaseActivity : AppCompatActivity() {
         windowInsetsController.isAppearanceLightStatusBars = isDark
     }
 
-    /**
-     * 设置导航栏颜色
-     * @param color 颜色值 (支持透明度)
-     */
-    fun setNavigationBarColor(@ColorInt color: Int) {
-        window.navigationBarColor = color
-    }
+
 
     /**
      * 设置全屏模式

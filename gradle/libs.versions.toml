@@ -40,6 +40,7 @@ xlog = "1.11.1"
 mmkv = "1.3.14"
 gson = "2.13.1"
 arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
+titlebar = "10.6"
 
 [libraries]
 # Kotlin
@@ -85,6 +86,8 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 xlog = { group = "com.elvishew", name = "xlog", version.ref = "xlog" }
 mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+titlebar = { group = "com.github.getActivity", name = "TitleBar", version.ref = "titlebar" }
 
 # ARouter
 arouter-api = { group = "com.alibaba", name = "arouter-api", version.ref = "arouter" }

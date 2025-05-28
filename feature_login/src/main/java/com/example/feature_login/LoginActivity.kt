@@ -7,12 +7,28 @@ import com.example.base.BaseActivity
 import com.example.constant.RouterPath
 import com.example.feature_login.databinding.ActivityLoginBinding
 import com.example.utils.ktx.binding
+import com.hjq.bar.OnTitleBarListener
+import com.hjq.bar.TitleBar
 
 @Route(path = RouterPath.Login.LOGIN_ACTIVITY)
 class LoginActivity : BaseActivity() {
     private val mBinding by binding(ActivityLoginBinding::inflate)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+    }
+
+    override fun initView() {
+        super.initView()
+        mBinding.titleBar.title = "登录"
+
+        mBinding.titleBar.setOnTitleBarListener(object : OnTitleBarListener {
+            override fun onLeftClick(titleBar: TitleBar?) {
+                super.onLeftClick(titleBar)
+                finish()
+            }
+        })
 
         mBinding.btnLogin.setOnClickListener {
             // 这里可以添加登录逻辑
