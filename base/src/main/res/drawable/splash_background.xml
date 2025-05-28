@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景色 -->
+    <item android:drawable="@color/primary"/>
+    <!-- 可在此添加 logo 或渐变等 -->
+    <!--
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher"/>
+    </item>
+    -->
+</layer-list>
