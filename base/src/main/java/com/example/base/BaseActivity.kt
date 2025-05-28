@@ -13,6 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.elvishew.xlog.XLog
+import com.example.utils.ktx.color
 
 /**
  * 基础Activity类，提供通用功能
@@ -48,7 +49,7 @@ abstract class BaseActivity : AppCompatActivity() {
         // 设置全屏模式（隐藏导航栏，滑动不显示系统栏）
         setFullScreen(hideNavigationBar = true)
         // 修改状态栏颜色
-        setStatusBarColor(Color.parseColor("#80FF0000")) // 半透明红色
+        setStatusBarColor(this.color(R.color.primary)) // 半透明红色
         // 显示系统状态栏
         showSystemBars()
     }
