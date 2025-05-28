@@ -36,6 +36,9 @@ android {
             arg("AROUTER_MODULE_NAME", project.getName())
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 dependencies {
     implementation project(':base')

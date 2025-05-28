@@ -10,14 +10,14 @@
         android:id="@+id/btnDay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="日间模式"
+        android:text="@string/day_mode"
         style="@style/AppButton"/>
 
     <Button
         android:id="@+id/btnNight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="夜间模式"
+        android:text="@string/night_mode"
         style="@style/AppButton"
         android:layout_marginTop="16dp"/>
 
@@ -25,7 +25,7 @@
         android:id="@+id/btnSystem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="跟随系统"
+        android:text="@string/system_mode"
         style="@style/AppButton"
         android:layout_marginTop="16dp"/>
 
