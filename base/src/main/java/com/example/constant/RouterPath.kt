@@ -19,4 +19,8 @@ object RouterPath {
     object Web {
         const val WEB_VIEW = "/web/view"
     }
+
+    object Setting {
+        const val BASE_SETTING = "/base/setting"
+    }
 }

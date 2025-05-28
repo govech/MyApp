@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <Button
+        android:id="@+id/btnDay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="日间模式"
+        style="@style/AppButton"/>
+
+    <Button
+        android:id="@+id/btnNight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="夜间模式"
+        style="@style/AppButton"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btnSystem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="跟随系统"
+        style="@style/AppButton"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout> 

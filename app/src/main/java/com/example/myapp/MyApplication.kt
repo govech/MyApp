@@ -6,6 +6,7 @@ import com.elvishew.xlog.XLog
 import com.elvishew.xlog.printer.AndroidPrinter
 import com.tencent.mmkv.MMKV
 import com.alibaba.android.arouter.launcher.ARouter
+import com.example.utils.NightModeUtils
 
 class MyApplication : Application() {
     companion object {
@@ -16,7 +17,7 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        
+
         // 初始化网络库
 
         // 初始化其他全局配置
@@ -37,5 +38,7 @@ class MyApplication : Application() {
             LogLevel.ALL, AndroidPrinter()
         )
         MMKV.initialize(this)
+        // 设置暗黑模式或者白天模式
+        NightModeUtils.applySavedNightMode()
     }
 }
