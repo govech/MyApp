@@ -32,7 +32,7 @@ class LoginActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        initBanner()
         binding.titleBar.title = "登录"
 
         binding.titleBar.setOnTitleBarListener(object : OnTitleBarListener {
@@ -99,5 +99,24 @@ class LoginActivity : BaseActivity() {
                 override fun onError(error: Drawable?) { /* 加载失败 */ }
             }
         )
+    }
+
+    override fun initView() {
+        super.initView()
+
+    }
+
+    private fun initBanner() {
+        binding.bannerView.setImages(listOf("https://avatars.githubusercontent.com/u/102040668?v=4",
+            "https://bing.ee123.net/img/?date=20250529&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250528&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250527&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250526&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250525&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250524&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250523&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250522&size=640x480&imgtype=jpg\n",
+            "https://bing.ee123.net/img/?date=20250521&size=640x480&imgtype=jpg\n"
+        ))
     }
 }

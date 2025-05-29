@@ -49,4 +49,4 @@ val todayRange: Pair<Long, Long>
 
 
 //dpToPx
-fun Context.dpToPx(dp: Float): Float = dp * this.resources.displayMetrics.density
+fun Context.dp2px(dp: Float): Float = dp * this.resources.displayMetrics.density
