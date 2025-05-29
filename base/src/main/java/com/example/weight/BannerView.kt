@@ -61,7 +61,7 @@ class BannerView @JvmOverloads constructor(
         }
         setupIndicator(images.size)
         currentIndex = 0
-        viewPager.setCurrentItem(0, false)
+        viewPager.setCurrentItem(Int.MAX_VALUE / 2, false)
         startAutoPlay()
     }
 
@@ -93,22 +93,25 @@ class BannerView @JvmOverloads constructor(
     private fun setupIndicator(count: Int) {
         indicatorLayout.removeAllViews()
         for (i in 0 until count) {
-            val dot = ImageView(context)
-            dot.setImageResource(R.drawable.banner_indicator_unselected)
-            val params = LinearLayout.LayoutParams(context.dp2px(8f).toInt(), context.dp2px(8f).toInt())
-            params.marginEnd = 8
-            params.bottomMargin = context.dp2px(20f).toInt()
-            dot.layoutParams = params
+            val dot = ImageView(context).apply {
+                val size = context.dp2px(8f).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    setMargins(8, 0, 8, 0)
+                }
+                setImageResource(R.drawable.banner_indicator_unselected)
+
+            }
             indicatorLayout.addView(dot)
         }
         updateIndicator()
     }
 
     private fun updateIndicator() {
+        val realIndex = currentIndex % imageList.size
         for (i in 0 until indicatorLayout.childCount) {
             val dot = indicatorLayout.getChildAt(i) as ImageView
             dot.setImageResource(
-                if (i == currentIndex) R.drawable.banner_indicator_selected
+                if (i == realIndex) R.drawable.banner_indicator_selected
                 else R.drawable.banner_indicator_unselected
             )
         }
@@ -142,11 +145,12 @@ class BannerView @JvmOverloads constructor(
         }
 
         override fun onBindViewHolder(holder: BannerViewHolder, position: Int) {
-            ImageLoader.load(images[position], holder.itemView as ImageView)
-            holder.itemView.setOnClickListener { clickListener(position) }
+            val realPos = position % images.size
+            ImageLoader.load(images[realPos], holder.itemView as ImageView)
+            holder.itemView.setOnClickListener { clickListener(realPos) }
         }
 
-        override fun getItemCount(): Int = images.size
+        override fun getItemCount(): Int = Int.MAX_VALUE
 
         class BannerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     }

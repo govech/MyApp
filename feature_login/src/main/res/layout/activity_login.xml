@@ -27,7 +27,7 @@
             android:layout_margin="20dp"
             android:id="@+id/banner_view"
             android:layout_width="match_parent"
-            android:layout_height="170dp" />
+            android:layout_height="wrap_content" />
 
         <EditText
             android:id="@+id/et_username"
