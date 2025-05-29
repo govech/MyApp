@@ -42,7 +42,6 @@ gson = "2.13.1"
 arouter = "1.5.2" # ARouter 最新版本（请根据实际情况替换）
 titlebar = "10.6"
 serialization = "1.6.0"
-converter = "1.0.0"
 coil = "2.4.0"
 coilVersion = "1.0.6"
 
@@ -69,7 +68,6 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 # 生命周期组件
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }  # 简化命名
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidx-lifecycle" }
 
 # Room
@@ -95,7 +93,6 @@ xlog = { group = "com.elvishew", name = "xlog", version.ref = "xlog" }
 mmkv = { group = "com.tencent", name = "mmkv", version.ref = "mmkv" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "converter" }
 titlebar = { group = "com.github.getActivity", name = "TitleBar", version.ref = "titlebar" }
 
 # ARouter
@@ -107,7 +104,7 @@ arouter-compiler = { group = "com.alibaba", name = "arouter-compiler", version.r
 coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
 
 # 生命周期
-lifecycle = ["lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "lifecycle-livedata-ktx", "lifecycle-common-java8"]
+lifecycle = ["lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "lifecycle-common-java8"]
 
 # 网络
 network = ["retrofit", "retrofit-converter-gson", "okhttp", "okhttp-logging"]

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 android {
     namespace 'com.example.lib_network'
@@ -40,7 +41,5 @@ android {
 }
 dependencies {
     implementation project(':base')
-    implementation libs.bundles.network
-    implementation libs.kotlinx.serialization.converter
-
+    api libs.bundles.network
 }
