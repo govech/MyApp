@@ -22,3 +22,5 @@
 
 
 -keep class com.hjq.bar.** {*;}  #https://github.com/getActivity/TitleBar
+
+-keep class com.example.coil.** { *; }
