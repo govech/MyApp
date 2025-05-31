@@ -2,5 +2,9 @@
 <resources>
     <declare-styleable name="BannerView">
         <attr name="cornerRadius" format="dimension" />
+        <attr name="autoPlayInterval" format="integer" />
+        <attr name="autoPlay" format="boolean" />
+        <attr name="showIndicator" format="boolean" />
+        <attr name="infiniteScroll" format="boolean" />
     </declare-styleable>
 </resources>

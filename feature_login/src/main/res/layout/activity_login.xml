@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background" />
 
-        <com.example.weight.BannerView
+        <com.example.weight.banner.BannerView
             android:layout_margin="20dp"
             android:id="@+id/banner_view"
             app:cornerRadius="16dp"
