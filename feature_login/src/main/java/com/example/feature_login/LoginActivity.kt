@@ -75,6 +75,13 @@ class LoginActivity : BaseActivity() {
                                 state.message,
                                 Toast.LENGTH_SHORT
                             ).show()
+
+                            // 临时跳转到登录页面
+                            ARouter.getInstance()
+                                .build(RouterPath.App.APP_MAIN)
+                                .navigation()
+                            finish()
+
                         }
                     }
                 }

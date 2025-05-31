@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MyApp"
-include ':app', ':base', ':lib_network', ':feature_login', ':feature_home', ':feature_user'
+include ':app', ':base', ':lib_network', ':feature_login', ':feature_home', ':feature_user', ':lib_tab_navigation'

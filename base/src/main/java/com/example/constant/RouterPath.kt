@@ -2,6 +2,10 @@ package com.example.constant
 
 object RouterPath {
 
+    object App {
+        const val APP_MAIN = "/app/main"
+    }
+
     object Login {
         const val LOGIN_ACTIVITY = "/login/login"
     }

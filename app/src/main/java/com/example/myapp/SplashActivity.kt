@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import com.alibaba.android.arouter.launcher.ARouter
+import com.example.constant.RouterPath
 import com.example.utils.ktx.startActivityKt
 
 class SplashActivity : AppCompatActivity() {
@@ -16,8 +18,15 @@ class SplashActivity : AppCompatActivity() {
         
         // 延迟跳转到登录页面
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivityKt<MainActivity>()
+//            startActivityKt<MainActivity>()
+
+
+            // 直接跳转到登录页面
+            ARouter.getInstance()
+                .build(RouterPath.Login.LOGIN_ACTIVITY)
+                .navigation()
             finish()
+
         }, SPLASH_DELAY)
     }
 }
