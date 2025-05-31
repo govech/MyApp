@@ -31,7 +31,9 @@
             android:layout_margin="20dp"
             app:autoPlayInterval="3000"
             app:autoPlay="true"
-            app:showIndicator="false"
+            app:indicatorSize="8dp"
+            app:indicatorMargin="4dp"
+            app:showIndicator="true"
             app:cornerRadius="16dp" />
 
         <EditText

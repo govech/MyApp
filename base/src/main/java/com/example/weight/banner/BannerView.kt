@@ -11,11 +11,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewpager2.widget.ViewPager2
+import com.elvishew.xlog.XLog
 import com.example.base.R
+import com.example.base.databinding.ViewBannerBinding
 import com.example.utils.ktx.dp2px
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +33,16 @@ class BannerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), DefaultLifecycleObserver {
 
+    private var currentSelectPosition: Int = 0 // 当前选中的图片位置
+
+    private var indicatorSelectedDrawable: Int = R.drawable.banner_indicator_selected  //  指示器样式（选中）
+    private var indicatorUnselectedDrawable: Int =
+        R.drawable.banner_indicator_unselected //  指示器样式（未选中）
+    private var indicatorSize: Int = context.dp2px(8f).toInt() //  指示器大小
+    private var indicatorMargin: Int = context.dp2px(4f).toInt() //  指示器间距
+
+
+    private lateinit var mBinding: ViewBannerBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var indicatorLayout: LinearLayout
 
@@ -42,13 +52,12 @@ class BannerView @JvmOverloads constructor(
     private var infiniteScrollEnabled = true //  是否开启无限滚动(滚动到最后一张时是否回到第一张)
     private var cornerRadius = context.dp2px(16f) //  圆角半径
 
-    private var adapter: BannerAdapter? = null
-    private var bannerClickListener: BannerClickListener? = null
+    private val adapter = BannerAdapter()
     private var onPageChangeListener: ((Int) -> Unit)? = null
 
     private val mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var autoPlayJob: Job? = null
-    private var isAutoPlayRunning = false
+    private var isAutoPlayRunning = false //  用于判断协程是否已经在运行,主要用来避免协程重复启动
 
     init {
         initView()
@@ -56,15 +65,17 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun initView() {
-        val root = LayoutInflater.from(context).inflate(R.layout.view_banner, this, true)
-        viewPager = root.findViewById(R.id.bannerViewPager)
-        indicatorLayout = root.findViewById(R.id.bannerIndicatorLayout)
+        mBinding = ViewBannerBinding.inflate(LayoutInflater.from(context), this, true)
+        viewPager = mBinding.bannerViewPager
+        indicatorLayout = mBinding.bannerIndicatorLayout
         clipToOutline = true
+        adapter.setInfiniteScrollEnabled(infiniteScrollEnabled)
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                val realPosition = position % (adapter?.getImageListSize() ?: 1)
+                val realPosition = position % adapter.getImageListSize()
                 updateIndicator(realPosition)
+                currentSelectPosition = realPosition
                 onPageChangeListener?.invoke(realPosition)
             }
 
@@ -77,14 +88,35 @@ class BannerView @JvmOverloads constructor(
         })
     }
 
+
     private fun initAttrs(attrs: AttributeSet?) {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
             try {
+                //banner属性
                 cornerRadius = getDimension(R.styleable.BannerView_cornerRadius, cornerRadius)
-                interval = getInt(R.styleable.BannerView_autoPlayInterval, interval.toInt()).toLong()
+                interval =
+                    getInt(R.styleable.BannerView_autoPlayInterval, interval.toInt()).toLong()
                 enableAutoPlay = getBoolean(R.styleable.BannerView_autoPlay, enableAutoPlay)
-                indicatorVisible = getBoolean(R.styleable.BannerView_showIndicator, indicatorVisible)
-                infiniteScrollEnabled = getBoolean(R.styleable.BannerView_infiniteScroll, infiniteScrollEnabled)
+                indicatorVisible =
+                    getBoolean(R.styleable.BannerView_showIndicator, indicatorVisible)
+                infiniteScrollEnabled =
+                    getBoolean(R.styleable.BannerView_infiniteScroll, infiniteScrollEnabled)
+
+                //  指示器属性
+                indicatorSelectedDrawable = getResourceId(
+                    R.styleable.BannerView_indicatorSelectedDrawable,
+                    indicatorSelectedDrawable
+                )
+                indicatorUnselectedDrawable = getResourceId(
+                    R.styleable.BannerView_indicatorUnselectedDrawable,
+                    indicatorUnselectedDrawable
+                )
+                indicatorSize =
+                    getDimensionPixelSize(R.styleable.BannerView_indicatorSize, indicatorSize)
+                indicatorMargin =
+                    getDimensionPixelSize(R.styleable.BannerView_indicatorMargin, indicatorMargin)
+
+
             } finally {
                 recycle()
             }
@@ -99,17 +131,15 @@ class BannerView @JvmOverloads constructor(
             viewPager.adapter = null
             return
         }
-        adapter = BannerAdapter(images, bannerClickListener).also {
-            it.setInfiniteScrollEnabled(infiniteScrollEnabled)
-        }
+        adapter.setImages(images)
         viewPager.adapter = adapter
-        viewPager.setCurrentItem(adapter!!.getStartPosition(), false)
+        viewPager.setCurrentItem(adapter.getStartPosition(), false)
         setupIndicator(images.size)
         startAutoPlay()
     }
 
     fun setOnBannerClickListener(listener: BannerClickListener) {
-        this.bannerClickListener = listener
+        adapter.setOnBannerClickListener(listener)
     }
 
     fun setOnPageChangeListener(listener: (Int) -> Unit) {
@@ -135,26 +165,30 @@ class BannerView @JvmOverloads constructor(
 
     private fun setupIndicator(count: Int) {
         indicatorLayout.removeAllViews()
-        val size = context.dp2px(8f).toInt()
         for (i in 0 until count) {
             val dot = ImageView(context).apply {
-                layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                    setMargins(8, 0, 8, 0)
+                layoutParams = LinearLayout.LayoutParams(indicatorSize, indicatorSize).apply {
+                    setMargins(indicatorMargin, 0, indicatorMargin, 0)
                 }
-                setImageResource(R.drawable.banner_indicator_unselected)
+                setImageResource(if (i == currentSelectPosition) indicatorSelectedDrawable else indicatorUnselectedDrawable)
             }
             indicatorLayout.addView(dot)
         }
-        updateIndicator(0)
+    }
+
+    /**
+     * 获取当前选中的图片索引
+     */
+    fun getCurrentSelectedPosition(): Int {
+        return currentSelectPosition
     }
 
     private fun updateIndicator(realPosition: Int) {
-        for (i in 0 until indicatorLayout.childCount) {
-            val dot = indicatorLayout.getChildAt(i) as ImageView
-            dot.setImageResource(
-                if (i == realPosition) R.drawable.banner_indicator_selected
-                else R.drawable.banner_indicator_unselected
-            )
+        if (indicatorLayout.childCount > 0) {
+            val lastSelected = indicatorLayout.getChildAt(currentSelectPosition) as ImageView
+            val currentSelected = indicatorLayout.getChildAt(realPosition) as ImageView
+            lastSelected.setImageResource(R.drawable.banner_indicator_unselected)
+            currentSelected.setImageResource(R.drawable.banner_indicator_selected)
         }
     }
 
@@ -209,7 +243,4 @@ class BannerView @JvmOverloads constructor(
     }
 
 
-    interface BannerClickListener {
-        fun onBannerClick(position: Int)
-    }
 }

@@ -9,11 +9,17 @@ import com.example.base.R
 import com.example.image.ImageLoader
 
 class BannerAdapter(
-    private val imageList: List<String>,
-    private val clickListener: BannerView.BannerClickListener?
+    private val imageList: MutableList<String> = mutableListOf()
 ) : RecyclerView.Adapter<BannerAdapter.BannerViewHolder>() {
 
     private var infiniteScrollEnabled = true
+
+    private var clickListener: BannerClickListener? = null
+
+    fun setOnBannerClickListener(listener: BannerClickListener?) {
+        clickListener = listener
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BannerViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -27,6 +33,12 @@ class BannerAdapter(
         holder.itemView.setOnClickListener {
             clickListener?.onBannerClick(realPos)
         }
+    }
+
+    fun setImages(images: List<String>) {
+        imageList.clear()
+        imageList.addAll(images)
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {

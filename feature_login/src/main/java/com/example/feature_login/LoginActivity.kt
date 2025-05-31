@@ -21,6 +21,7 @@ import com.example.image.ImageLoader
 import com.example.image.ImageOptions
 import com.example.lib_network.model.ResultWrapper
 import com.example.utils.ktx.binding
+import com.example.weight.banner.BannerClickListener
 import com.example.weight.banner.BannerView
 import com.hjq.bar.OnTitleBarListener
 import com.hjq.bar.TitleBar
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 
 @Route(path = RouterPath.Login.LOGIN_ACTIVITY)
 class LoginActivity : BaseActivity() {
-    private val  binding by binding(ActivityLoginBinding::inflate)
+    private val binding by binding(ActivityLoginBinding::inflate)
     private val viewModel: LoginViewModel by viewModels { LoginViewModelFactory(LoginRepository()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +118,8 @@ class LoginActivity : BaseActivity() {
         binding.bannerView.apply {
             attachToLifecycle(lifecycle)
 
+
+
             setImages(
                 listOf(
                     "https://avatars.githubusercontent.com/u/102040668?v=4",
@@ -132,24 +135,17 @@ class LoginActivity : BaseActivity() {
                 )
             )
 
-           setOnBannerClickListener(object : BannerView.BannerClickListener{
-               override fun onBannerClick(position: Int) {
-                   Toast.makeText(
-                       this@LoginActivity,
-                       "点击了第${position + 1}张图片",
-                       Toast.LENGTH_SHORT
-                   ).show()
-               }
+            setOnBannerClickListener(object : BannerClickListener {
+                override fun onBannerClick(position: Int) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "点击了第${position + 1}张图片",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
-           })
 
-            setOnPageChangeListener { position ->
-//                Toast.makeText(
-//                    this@LoginActivity,
-//                    "滑动到第${position + 1}张图片",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-            }
+            })
         }
     }
 }
