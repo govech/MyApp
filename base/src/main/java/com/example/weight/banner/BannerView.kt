@@ -5,19 +5,17 @@ import android.graphics.Outline
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewpager2.widget.ViewPager2
-import com.elvishew.xlog.XLog
 import com.example.base.R
-import com.example.image.ImageLoader
 import com.example.utils.ktx.dp2px
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,36 +26,33 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+
 class BannerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : FrameLayout(context, attrs, defStyleAttr), DefaultLifecycleObserver {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var indicatorLayout: LinearLayout
-    private var imageList: List<String> = emptyList()
-    private var interval: Long = 3000L
-    private var enableAutoPlay = true//是否开启自动播放
 
-    // 回调
-    private var onItemClickListener: ((Int) -> Unit)? = null
+    private var interval: Long = 3000L //  自动轮播间隔时间
+    private var enableAutoPlay = true //  是否开启自动轮播
+    private var indicatorVisible = true //  是否显示指示器
+    private var infiniteScrollEnabled = true //  是否开启无限滚动(滚动到最后一张时是否回到第一张)
+    private var cornerRadius = context.dp2px(16f) //  圆角半径
+
+    private var adapter: BannerAdapter? = null
+    private var bannerClickListener: BannerClickListener? = null
     private var onPageChangeListener: ((Int) -> Unit)? = null
 
-
-    private var indicatorVisible = true // 是否显示指示器
-    private var infiniteScrollEnabled = true//循环滚动
-
-    private val adapter = BannerAdapter()
-    private var cornerRadius = context.dp2px(16f) // 默认 16dp
     private val mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private var job: Job? = null
-    private var isAutoPlayRunning = false //用于判断协程是否已经在运行,主要用来避免协程重复启动
+    private var autoPlayJob: Job? = null
+    private var isAutoPlayRunning = false
 
     init {
         initView()
-        initAttributes(attrs)
-        setupViewPager()
+        initAttrs(attrs)
     }
 
     private fun initView() {
@@ -65,138 +60,77 @@ class BannerView @JvmOverloads constructor(
         viewPager = root.findViewById(R.id.bannerViewPager)
         indicatorLayout = root.findViewById(R.id.bannerIndicatorLayout)
         clipToOutline = true
-    }
 
-    private fun initAttributes(attrs: AttributeSet?) {
-        context.theme.obtainStyledAttributes(
-            attrs,
-            R.styleable.BannerView,
-            0, 0
-        ).apply {
-            try {
-                cornerRadius = getDimension(R.styleable.BannerView_cornerRadius, cornerRadius)
-                interval =
-                    getInt(R.styleable.BannerView_autoPlayInterval, interval.toInt()).toLong()
-                enableAutoPlay = getBoolean(R.styleable.BannerView_autoPlay, enableAutoPlay)
-                indicatorVisible =
-                    getBoolean(R.styleable.BannerView_showIndicator, indicatorVisible)
-                infiniteScrollEnabled =
-                    getBoolean(R.styleable.BannerView_infiniteScroll, infiniteScrollEnabled)
-            } finally {
-                recycle()
-            }
-        }
-
-        indicatorLayout.visibility = if (indicatorVisible) View.VISIBLE else View.GONE
-    }
-
-
-    private fun setupViewPager() {
-        viewPager.adapter = adapter
-
-        adapter.setInfiniteScrollEnabled(infiniteScrollEnabled)
-
-        // 设置点击监听
-        adapter.setOnItemClickListener { position ->
-            onItemClickListener?.invoke(position)
-        }
-
-        // 页面变化监听
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                val realPosition = position % imageList.size
+                val realPosition = position % (adapter?.getImageListSize() ?: 1)
                 updateIndicator(realPosition)
                 onPageChangeListener?.invoke(realPosition)
             }
 
             override fun onPageScrollStateChanged(state: Int) {
                 when (state) {
-                    ViewPager2.SCROLL_STATE_DRAGGING -> {
-                        /** 拖动页面: 停止自动滚动 */
-                        stopAutoPlay()
-                    }
-
-                    ViewPager2.SCROLL_STATE_IDLE -> {
-                        /** 停止滚动: 开启自动滚动 */
-                        startAutoPlay()
-                    }
+                    ViewPager2.SCROLL_STATE_IDLE -> startAutoPlay()
+                    ViewPager2.SCROLL_STATE_DRAGGING -> stopAutoPlay()
                 }
-
             }
         })
     }
 
-    /**
-     * 设置自动播放间隔
-     */
-    fun setInterval(millis: Long) {
-        if (millis <= 0) return
-        interval = millis
-        if (isAutoPlayRunning) {
-            startAutoPlay() // 重新启动以应用新间隔
-        }
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, w, h, cornerRadius)
+    private fun initAttrs(attrs: AttributeSet?) {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
+            try {
+                cornerRadius = getDimension(R.styleable.BannerView_cornerRadius, cornerRadius)
+                interval = getInt(R.styleable.BannerView_autoPlayInterval, interval.toInt()).toLong()
+                enableAutoPlay = getBoolean(R.styleable.BannerView_autoPlay, enableAutoPlay)
+                indicatorVisible = getBoolean(R.styleable.BannerView_showIndicator, indicatorVisible)
+                infiniteScrollEnabled = getBoolean(R.styleable.BannerView_infiniteScroll, infiniteScrollEnabled)
+            } finally {
+                recycle()
             }
         }
-    }
-
-    fun setCornerRadius(radiusDp: Float) {
-        cornerRadius = context.dp2px(radiusDp)
-        invalidateOutline()
+        indicatorLayout.visibility = if (indicatorVisible) View.VISIBLE else View.GONE
     }
 
     fun setImages(images: List<String>) {
+        stopAutoPlay()
         if (images.isEmpty()) {
-            stopAutoPlay()
             indicatorLayout.removeAllViews()
             viewPager.adapter = null
             return
         }
-        imageList = images
-        adapter.setImages(images)
-        val startIndex = Int.MAX_VALUE / 2 - (Int.MAX_VALUE / 2) % images.size
-        viewPager.setCurrentItem(startIndex, false)
+        adapter = BannerAdapter(images, bannerClickListener).also {
+            it.setInfiniteScrollEnabled(infiniteScrollEnabled)
+        }
+        viewPager.adapter = adapter
+        viewPager.setCurrentItem(adapter!!.getStartPosition(), false)
         setupIndicator(images.size)
         startAutoPlay()
     }
 
+    fun setOnBannerClickListener(listener: BannerClickListener) {
+        this.bannerClickListener = listener
+    }
+
+    fun setOnPageChangeListener(listener: (Int) -> Unit) {
+        this.onPageChangeListener = listener
+    }
+
+    fun setInterval(ms: Long) {
+        if (ms > 0) {
+            interval = ms
+            if (isAutoPlayRunning) startAutoPlay()
+        }
+    }
+
+    fun setCornerRadius(dp: Float) {
+        cornerRadius = context.dp2px(dp)
+        invalidateOutline()
+    }
 
     fun setAutoPlay(enable: Boolean) {
         enableAutoPlay = enable
         if (enable) startAutoPlay() else stopAutoPlay()
-    }
-
-    fun setOnItemClickListener(listener: (Int) -> Unit) {
-        onItemClickListener = listener
-    }
-    fun setOnPageChangeListener(listener: (Int) -> Unit) {
-        onPageChangeListener = listener
-    }
-
-    private fun startAutoPlay() {
-        stopAutoPlay()
-        if (!enableAutoPlay || imageList.isEmpty() || imageList.size < 2 || isAutoPlayRunning) return
-        isAutoPlayRunning = true
-        job = mainScope.launch {
-            while (isActive) {
-                delay(interval)
-                val next = viewPager.currentItem + 1
-                viewPager.setCurrentItem(next, true)
-            }
-        }
-    }
-
-    private fun stopAutoPlay() {
-        if (!isAutoPlayRunning) return
-        job?.cancel()
-        job = null
-        isAutoPlayRunning = false
     }
 
     private fun setupIndicator(count: Int) {
@@ -224,6 +158,25 @@ class BannerView @JvmOverloads constructor(
         }
     }
 
+    private fun startAutoPlay() {
+        stopAutoPlay()
+        val size = adapter?.getImageListSize() ?: return
+        if (!enableAutoPlay || size < 2) return
+        isAutoPlayRunning = true
+        autoPlayJob = mainScope.launch {
+            while (isActive) {
+                delay(interval)
+                viewPager.setCurrentItem(viewPager.currentItem + 1, true)
+            }
+        }
+    }
+
+    private fun stopAutoPlay() {
+        if (!isAutoPlayRunning) return
+        autoPlayJob?.cancel()
+        autoPlayJob = null
+        isAutoPlayRunning = false
+    }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
@@ -235,19 +188,28 @@ class BannerView @JvmOverloads constructor(
         startAutoPlay()
     }
 
+    override fun onResume(owner: LifecycleOwner) = startAutoPlay()
+    override fun onPause(owner: LifecycleOwner) = stopAutoPlay()
+    override fun onDestroy(owner: LifecycleOwner) = mainScope.cancel()
 
-    // 可选：添加生命周期感知
+    /**
+     *  用于在Activity/Fragment中添加生命周期监听,调用这个方法会让轮播器在界面可见时自动播放,界面不可见时自动暂停
+     */
     fun attachToLifecycle(lifecycle: Lifecycle) {
-        lifecycle.addObserver(object : LifecycleEventObserver {
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> startAutoPlay()
-                    Lifecycle.Event.ON_PAUSE -> stopAutoPlay()
-                    Lifecycle.Event.ON_DESTROY -> mainScope.cancel()
-                    else -> {}
-                }
-            }
-        })
+        lifecycle.addObserver(this)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setRoundRect(0, 0, w, h, cornerRadius)
+            }
+        }
+    }
+
+
+    interface BannerClickListener {
+        fun onBannerClick(position: Int)
+    }
 }

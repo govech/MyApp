@@ -21,6 +21,7 @@ import com.example.image.ImageLoader
 import com.example.image.ImageOptions
 import com.example.lib_network.model.ResultWrapper
 import com.example.utils.ktx.binding
+import com.example.weight.banner.BannerView
 import com.hjq.bar.OnTitleBarListener
 import com.hjq.bar.TitleBar
 import kotlinx.coroutines.launch
@@ -131,13 +132,16 @@ class LoginActivity : BaseActivity() {
                 )
             )
 
-            setOnItemClickListener {
-                 Toast.makeText(
-                    this@LoginActivity,
-                    "点击了第${it + 1}张图片",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+           setOnBannerClickListener(object : BannerView.BannerClickListener{
+               override fun onBannerClick(position: Int) {
+                   Toast.makeText(
+                       this@LoginActivity,
+                       "点击了第${position + 1}张图片",
+                       Toast.LENGTH_SHORT
+                   ).show()
+               }
+
+           })
 
             setOnPageChangeListener { position ->
 //                Toast.makeText(
