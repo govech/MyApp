@@ -43,12 +43,17 @@ class MainActivity : BaseActivity() {
         mBinding.bottomTabLayout.setupTabs(tabItems)
 
 
-        val tabNavigator = TabFragmentNavigator(supportFragmentManager, R.id.fragmentContainer, tabItems)
+        val tabNavigator =
+            TabFragmentNavigator(supportFragmentManager, R.id.fragmentContainer, tabItems)
         tabNavigator.switchTo(0) // 默认显示第一个
 
         mBinding.bottomTabLayout.setOnTabSelectedListener {
             // 切换tab
             tabNavigator.switchTo(it)
         }
+
+        mBinding.bottomTabLayout.setBadge(2,100)
+        mBinding.bottomTabLayout.setBadge(1,9)
+        mBinding.bottomTabLayout.setBadge(0,0)
     }
 }
