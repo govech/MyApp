@@ -3,17 +3,10 @@ package com.example.utils.ktx
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.view.LayoutInflater
-import androidx.viewbinding.ViewBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
-fun <VB : ViewBinding> Activity.binding(inflater: (LayoutInflater) -> VB) = lazy {
-    inflater(layoutInflater).apply { setContentView(root) }
-}
-
 
 
 //启动Activity

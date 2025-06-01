@@ -1,47 +1,17 @@
 package com.example.myapp
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import com.example.base.BaseLazyFragment
+import com.example.myapp.databinding.FragmentMessageBinding
 
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-
-class MessageFragment : BaseLazyFragment() {
-    private var param1: String? = null
-    private var param2: String? = null
+class MessageFragment : BaseLazyFragment<FragmentMessageBinding>() {
     override fun onLazyLoad() {
         Toast .makeText(context, "MessageFragment", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_message, container, false)
-    }
+    override fun onBindingCreated() {
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MessageFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }

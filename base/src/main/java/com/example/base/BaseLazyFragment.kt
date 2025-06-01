@@ -2,13 +2,14 @@ package com.example.base
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
+import androidx.viewbinding.ViewBinding
 import com.example.lib_tab_navigation.core.TabFragmentNavigator
+
 /**
  * 懒加载 Fragment 的抽象基类
  * 实现了 TabFragmentNavigator.LazyLoadable 接口，用于在 Fragment 可见时进行懒加载
  */
-abstract class BaseLazyFragment : Fragment(), TabFragmentNavigator.LazyLoadable {
+abstract class BaseLazyFragment<VB : ViewBinding> : BaseBindingFragment<VB>(), TabFragmentNavigator.LazyLoadable {
 
     // 标记 Fragment 是否已加载
     private var hasLoaded = false
