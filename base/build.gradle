@@ -74,4 +74,5 @@ dependencies {
     implementation libs.coil
     implementation(libs.coil.gif)
     implementation(libs.transformers.coil)
+    api project(':lib_tab_navigation')
 }

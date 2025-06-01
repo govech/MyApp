@@ -42,7 +42,6 @@ dependencies {
     implementation project(':feature_home')
     implementation project(':feature_user')
     implementation project(':feature_login')
-    implementation project(':lib_tab_navigation')
     kapt libs.arouter.compiler
 
 }
