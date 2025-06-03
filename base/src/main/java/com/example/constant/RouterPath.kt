@@ -4,6 +4,7 @@ object RouterPath {
 
     object App {
         const val APP_MAIN = "/app/main"
+        const val APP_DOWNLOAD = "/app/download"
     }
 
     object Login {

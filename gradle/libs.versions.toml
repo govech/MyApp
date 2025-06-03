@@ -1,8 +1,8 @@
 [versions]
 # SDK 版本
-compileSdk = "34"
+compileSdk = "35"
 minSdk = "23"
-targetSdk = "34"
+targetSdk = "35"
 
 # Kotlin
 kotlin = "1.9.24"
@@ -44,6 +44,7 @@ titlebar = "10.6"
 serialization = "1.6.0"
 coil = "2.4.0"
 coilVersion = "1.0.6"
+activity = "1.10.0"
 
 [libraries]
 # Kotlin
@@ -98,6 +99,7 @@ titlebar = { group = "com.github.getActivity", name = "TitleBar", version.ref = 
 # ARouter
 arouter-api = { group = "com.alibaba", name = "arouter-api", version.ref = "arouter" }
 arouter-compiler = { group = "com.alibaba", name = "arouter-compiler", version.ref = "arouter" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 
 [bundles]
 # 协程

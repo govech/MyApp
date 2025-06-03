@@ -21,6 +21,7 @@ import com.example.image.ImageLoader
 import com.example.image.ImageOptions
 import com.example.lib_network.model.ResultWrapper
 import com.example.utils.ktx.binding
+import com.example.utils.ktx.startActivityKt
 import com.example.weight.banner.BannerClickListener
 import com.example.weight.banner.BannerView
 import com.hjq.bar.OnTitleBarListener
@@ -52,6 +53,10 @@ class LoginActivity : BaseActivity() {
 
         binding.btnSettings.setOnClickListener {
             ARouter.getInstance().build(RouterPath.Setting.BASE_SETTING).navigation()
+        }
+
+        binding.btnDownload.setOnClickListener {
+            ARouter .getInstance().build(RouterPath.App.APP_DOWNLOAD).navigation()
         }
 
         lifecycleScope.launch {
