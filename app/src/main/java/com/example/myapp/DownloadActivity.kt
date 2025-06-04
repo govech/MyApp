@@ -1,16 +1,16 @@
 package com.example.myapp
 
-import DownloadHelper
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.example.base.BaseActivity
 import com.example.constant.RouterPath
+import com.example.download.downloadmanage.DownloadHelper
 import com.example.myapp.databinding.ActivityDownloadBinding
 import com.example.utils.ktx.binding
+import com.example.utils.ktx.startActivityKt
 
 @Route(path = RouterPath.App.APP_DOWNLOAD)
 class DownloadActivity : BaseActivity() {
@@ -50,6 +50,11 @@ class DownloadActivity : BaseActivity() {
 
         mBinding.btnCancle.setOnClickListener {
             downloadHelper.cancel()
+        }
+
+
+        mBinding.button2.setOnClickListener {
+            startActivityKt<DownLoadFromOkhttpActivity>()
         }
 
     }
