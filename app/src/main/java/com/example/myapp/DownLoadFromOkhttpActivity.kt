@@ -17,8 +17,8 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
     private val mBinding by binding(ActivityDownLoadFromOkhttpBinding::inflate)
 
     //    private val url = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
-//    private val url = "https://media.w3.org/2010/05/sintel/trailer.mp4"
-    private val url = "https://github.com/dhewm/dhewm3/releases/download/1.5.4/dhewm3-mods-1.5.4_win32.zip"
+    private val url = "https://media.w3.org/2010/05/sintel/trailer.mp4"
+//    private val url = "https://github.com/dhewm/dhewm3/releases/download/1.5.4/dhewm3-mods-1.5.4_win32.zip"
     private var downloadId = ""
 
 
@@ -27,27 +27,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
 
-//        lifecycleScope.launch {
-//            DownloadHelper.registerCallback(url, object : DownloadCallback {
-//                override fun onStatusChanged(status: DownloadStatus) {
-//                    when (status) {
-//                        is DownloadStatus.Connecting -> Log.d("Test", "连接中...")
-//                        is DownloadStatus.Progress -> Log.d("Test", "进度: ${status.percentage}")
-//                        is DownloadStatus.Completed -> Log.d("Test", "完成: ${status.filePath}")
-//                        is DownloadStatus.Failed -> Log.d("Test", "失败: ${status.message}")
-//                        is DownloadStatus.Cancelled -> Log.d("Test", "取消")
-//                        else -> Unit
-//                    }
-//                }
-//
-//            })
-//        }
-//
-//        mBinding.btnDownloadOkhttp.setOnClickListener {
-//            lifecycleScope.launch {
-//                DownloadHelper.enqueue(this@DownLoadFromOkhttpActivity, url, "fileName")
-//            }
-//        }
+
 
 
         val downloadManager = DownloadManager.getInstance(
@@ -104,7 +84,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
             // 开始下载
             downloadId = downloadManager.download(
                 url = url,
-                filePath = videoDir?.absolutePath ?: "",
+                dir = videoDir?.absolutePath ?: "",
                 fileName = "myfile.zip",
                 listener = listener
             )

@@ -4,9 +4,11 @@ import okhttp3.Request
 import okio.IOException
 import java.io.File
 import java.io.RandomAccessFile
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.ceil
 import kotlin.math.min
 
 /**
@@ -65,7 +67,7 @@ class DownloadTask(
         if (isCancelled) return
 
         try {
-            if (downloadInfo.status == DownloadStatus.PAUSED) {
+            if (downloadInfo.status == DownloadStatus.PAUSED && !isCancelled) {
                 updateStatus(DownloadStatus.DOWNLOADING)
                 downloadManager.notifyListeners(downloadInfo.id) { it.onResume(downloadInfo) }
             } else {
@@ -101,10 +103,14 @@ class DownloadTask(
                 val supportRange = serverInfo.first
                 val totalSize = serverInfo.second
 
+                if (totalSize == Long.MAX_VALUE) {
+                    throw IOException("File size too large: $totalSize")
+                }
+
                 downloadInfo = downloadInfo.copy(totalBytes = totalSize)
                 downloadManager.updateDownloadInfo(downloadInfo)
 
-                if (supportRange && totalSize > config.bufferSize * config.threadCount) {
+                if (supportRange && totalSize > 0 && totalSize > config.bufferSize * config.threadCount) {
                     // 多线程下载
                     multiThreadDownload(tempFile, totalSize)
                 } else {
@@ -115,7 +121,16 @@ class DownloadTask(
                 // 下载完成，重命名临时文件
                 if (!isCancelled && !isPaused) {
                     if (tempFile.exists()) {
-                        tempFile.renameTo(file)
+                        try {
+                            if (!tempFile.renameTo(file)) {
+                                throw IOException("Failed to rename temp file to final file")
+                            }
+                        } catch (e: IOException) {
+                            tempFile.delete()
+                            updateStatus(DownloadStatus.FAILED, e.message)
+                            downloadManager.notifyListeners(downloadInfo.id) { it.onError(downloadInfo, e) }
+                            return
+                        }
                     }
                     updateStatus(DownloadStatus.COMPLETED)
                     downloadInfo = downloadInfo.copy(completeTime = System.currentTimeMillis())
@@ -129,7 +144,12 @@ class DownloadTask(
                 if (retryCount <= config.retryCount && !isCancelled && !isPaused) {
                     Thread.sleep(config.retryDelay)
                 } else {
+                    tempFile.delete() // 失败时清理临时文件
                     throw e
+                }
+            } finally {
+                if (isCancelled) { // 仅在取消时删除临时文件
+                    tempFile.delete()
                 }
             }
         }
@@ -152,19 +172,20 @@ class DownloadTask(
 
             val acceptRanges = response.header("Accept-Ranges")
             val supportRange = acceptRanges == "bytes"
-            val contentLength = response.header("Content-Length")?.toLongOrNull() ?: 0L
-
+            val contentLength = response.header("Content-Length")?.toLongOrNull() ?: -1L
+            if (contentLength <= 0) {
+                throw IOException("Invalid Content-Length: $contentLength")
+            }
             return Pair(supportRange, contentLength)
         }
     }
-
 
     /**
      * 单线程下载文件
      * @param tempFile 临时文件
      */
     private fun singleThreadDownload(tempFile: File) {
-        val existingSize = if (tempFile.exists()) tempFile.length() else 0L
+        var existingSize = if (tempFile.exists()) tempFile.length() else 0L
 
         val requestBuilder = Request.Builder().url(downloadInfo.url)
         if (existingSize > 0) {
@@ -187,7 +208,7 @@ class DownloadTask(
                     val buffer = ByteArray(config.bufferSize)
                     var downloadedBytes = existingSize
                     var lastUpdateTime = System.currentTimeMillis()
-                    var lastDownloadedBytes = downloadedBytes
+                    var startTime = lastUpdateTime
 
                     while (!isCancelled && !isPaused) {
                         val bytesRead = source.read(buffer)
@@ -198,8 +219,7 @@ class DownloadTask(
 
                         val currentTime = System.currentTimeMillis()
                         if (currentTime - lastUpdateTime >= config.progressUpdateInterval) {
-                            val speed =
-                                ((downloadedBytes - lastDownloadedBytes) * 1000L) / (currentTime - lastUpdateTime)
+                            val speed = ((downloadedBytes - existingSize) * 1000L) / (currentTime - startTime)
                             val remainingTime = if (speed > 0 && totalSize > 0) {
                                 (totalSize - downloadedBytes) / speed
                             } else 0L
@@ -218,7 +238,8 @@ class DownloadTask(
                             }
 
                             lastUpdateTime = currentTime
-                            lastDownloadedBytes = downloadedBytes
+                            startTime = currentTime
+                            existingSize = downloadedBytes
                         }
                     }
                 }
@@ -226,47 +247,74 @@ class DownloadTask(
         }
     }
 
-
     /**
      * 多线程下载文件
      * @param tempFile 临时文件
      * @param totalSize 文件总大小
      */
     private fun multiThreadDownload(tempFile: File, totalSize: Long) {
-        val existingSize = if (tempFile.exists()) tempFile.length() else 0L
+        var existingSize = if (tempFile.exists()) tempFile.length() else 0L
         val remainingSize = totalSize - existingSize
 
         if (remainingSize <= 0) return
 
-        val threadCount = min(config.threadCount, (remainingSize / config.bufferSize).toInt() + 1)
-        val chunkSize = remainingSize / threadCount
+        // 确保文件存在并设置正确长度
+        if (!tempFile.exists()) {
+            tempFile.createNewFile()
+        }
+        RandomAccessFile(tempFile, "rw").use { raf ->
+            if (raf.length() < totalSize) {
+                raf.setLength(totalSize)
+            }
+        }
+
+        val threadCount = min(config.threadCount, ceil(remainingSize.toDouble() / config.minChunkSize).toInt().coerceAtLeast(1))
+        val chunkSize = ceil(remainingSize.toDouble() / threadCount).toLong()
 
         val executor = Executors.newFixedThreadPool(threadCount)
         val futures = mutableListOf<Future<*>>()
         val downloadedBytes = AtomicLong(existingSize)
-        val lastUpdateTime = AtomicLong(System.currentTimeMillis())
-        val lastDownloadedBytes = AtomicLong(existingSize)
 
         for (i in 0 until threadCount) {
             val start = existingSize + i * chunkSize
-            val end =
-                if (i == threadCount - 1) totalSize - 1 else existingSize + (i + 1) * chunkSize - 1
+            val end = if (i == threadCount - 1) totalSize - 1 else existingSize + (i + 1) * chunkSize - 1
 
             val future = executor.submit {
-                downloadChunk(
-                    tempFile,
-                    start,
-                    end,
-                    downloadedBytes,
-                    lastUpdateTime,
-                    lastDownloadedBytes,
-                    totalSize
-                )
+                downloadChunk(tempFile, start, end, downloadedBytes)
             }
             futures.add(future)
         }
 
-        // 等待所有线程完成
+        // 定时更新进度
+        var startTime = System.currentTimeMillis()
+        var lastUpdateTime = startTime
+        while (!futures.all { it.isDone } && !isCancelled && !isPaused) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastUpdateTime >= config.progressUpdateInterval) {
+                val currentDownloaded = downloadedBytes.get()
+                val speed = ((currentDownloaded - existingSize) * 1000L) / (currentTime - startTime)
+                val remainingTime = if (speed > 0) {
+                    (totalSize - currentDownloaded) / speed
+                } else 0L
+
+                val progress = DownloadProgress(
+                    downloadedBytes = currentDownloaded,
+                    totalBytes = totalSize,
+                    speed = speed,
+                    remainingTime = remainingTime
+                )
+
+                downloadInfo = downloadInfo.copy(downloadedBytes = currentDownloaded)
+                downloadManager.updateDownloadInfo(downloadInfo)
+                downloadManager.notifyListeners(downloadInfo.id) { it.onProgress(downloadInfo, progress) }
+
+                lastUpdateTime = currentTime
+                startTime = currentTime
+                existingSize = currentDownloaded
+            }
+            Thread.sleep(100) // 避免CPU过高占用
+        }
+
         try {
             futures.forEach { it.get() }
         } finally {
@@ -274,25 +322,18 @@ class DownloadTask(
         }
     }
 
-
     /**
      * 下载文件块
      * @param tempFile 临时文件
      * @param start 起始位置
      * @param end 结束位置
      * @param totalDownloadedBytes 已下载的总字节数
-     * @param lastUpdateTime 上次更新进度的时间
-     * @param lastDownloadedBytes 上次更新进度时已下载的字节数
-     * @param totalSize 文件总大小
      */
     private fun downloadChunk(
         tempFile: File,
         start: Long,
         end: Long,
-        totalDownloadedBytes: AtomicLong,
-        lastUpdateTime: AtomicLong,
-        lastDownloadedBytes: AtomicLong,
-        totalSize: Long
+        totalDownloadedBytes: AtomicLong
     ) {
         val request = Request.Builder()
             .url(downloadInfo.url)
@@ -311,45 +352,16 @@ class DownloadTask(
 
                 body.source().use { source ->
                     val buffer = ByteArray(config.bufferSize)
-
                     while (!isCancelled && !isPaused) {
                         val bytesRead = source.read(buffer)
                         if (bytesRead == -1) break
-
                         raf.write(buffer, 0, bytesRead)
-                        val currentDownloaded = totalDownloadedBytes.addAndGet(bytesRead.toLong())
-
-                        val currentTime = System.currentTimeMillis()
-                        if (currentTime - lastUpdateTime.get() >= config.progressUpdateInterval) {
-                            if (lastUpdateTime.compareAndSet(lastUpdateTime.get(), currentTime)) {
-                                val lastBytes = lastDownloadedBytes.getAndSet(currentDownloaded)
-                                val speed =
-                                    ((currentDownloaded - lastBytes) * 1000L) / config.progressUpdateInterval
-                                val remainingTime = if (speed > 0) {
-                                    (totalSize - currentDownloaded) / speed
-                                } else 0L
-
-                                val progress = DownloadProgress(
-                                    downloadedBytes = currentDownloaded,
-                                    totalBytes = totalSize,
-                                    speed = speed,
-                                    remainingTime = remainingTime
-                                )
-
-                                downloadInfo =
-                                    downloadInfo.copy(downloadedBytes = currentDownloaded)
-                                downloadManager.updateDownloadInfo(downloadInfo)
-                                downloadManager.notifyListeners(downloadInfo.id) {
-                                    it.onProgress(downloadInfo, progress)
-                                }
-                            }
-                        }
+                        totalDownloadedBytes.addAndGet(bytesRead.toLong())
                     }
                 }
             }
         }
     }
-
 
     /**
      * 更新下载任务状态

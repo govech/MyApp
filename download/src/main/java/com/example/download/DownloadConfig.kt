@@ -12,6 +12,7 @@ package com.example.download
  * @param threadCount 多线程下载的线程数，默认为3
  * @param bufferSize 缓冲区大小，默认为8192字节
  * @param progressUpdateInterval 进度更新间隔，默认为500毫秒
+ * @param minChunkSize 最小分片大小，默认为 1MB
  */
 data class DownloadConfig(
     val maxConcurrentDownloads: Int = 3,
@@ -22,5 +23,6 @@ data class DownloadConfig(
     val retryDelay: Long = 1000L,
     val threadCount: Int = 3,
     val bufferSize: Int = 8192,
-    val progressUpdateInterval: Long = 500L
+    val progressUpdateInterval: Long = 500L,
+    val minChunkSize: Long = 1048576
 )

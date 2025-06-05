@@ -59,16 +59,16 @@ class DownloadManager private constructor(
      */
     fun download(
         url: String,
-        filePath: String,
+        dir: String,
         fileName: String? = null,
         listener: DownloadListener? = null
     ): String {
         // 生成下载ID
-        val downloadId = generateDownloadId(url, filePath)
+        val downloadId = generateDownloadId(url, dir)
         // 实际的文件名
         val actualFileName = fileName ?: extractFileNameFromUrl(url)
         // 文件的完整路径
-        val fullPath = File(filePath, actualFileName).absolutePath
+        val fullPath = File(dir, actualFileName).absolutePath
 
         // 创建下载信息对象
         val downloadInfo = DownloadInfo(
@@ -108,6 +108,13 @@ class DownloadManager private constructor(
         val downloadInfo = downloadInfoMap[downloadId] ?: return false
         // 检查任务状态
         if (downloadInfo.status != DownloadStatus.PAUSED) return false
+
+        // 验证临时文件
+        val tempFile = File("${downloadInfo.filePath}.tmp")
+        if (tempFile.exists() && tempFile.length() != downloadInfo.downloadedBytes) {
+            tempFile.delete()
+            downloadInfoMap[downloadId] = downloadInfo.copy(downloadedBytes = 0L)
+        }
 
         // 创建并提交下载任务
         val task = DownloadTask(downloadInfo, this)
@@ -238,8 +245,9 @@ class DownloadManager private constructor(
      * 生成下载ID
      */
     private fun generateDownloadId(url: String, filePath: String): String {
+        val uniqueString = "$url$filePath${System.nanoTime()}" // 添加时间戳避免冲突
         return MessageDigest.getInstance("MD5")
-            .digest("$url$filePath".toByteArray())
+            .digest(uniqueString.toByteArray())
             .joinToString("") { "%02x".format(it) }
     }
 
@@ -248,10 +256,11 @@ class DownloadManager private constructor(
      */
     private fun extractFileNameFromUrl(url: String): String {
         return try {
-            val fileName = url.substringAfterLast("/").substringBefore("?")
-            if (fileName.isNotEmpty()) fileName else "download_${System.currentTimeMillis()}"
+            val fileName = url.substringAfterLast("/").substringBefore("?").substringBefore("#")
+            if (fileName.isNotEmpty() && fileName.contains(".")) fileName
+            else "download_${System.currentTimeMillis()}.dat"
         } catch (e: Exception) {
-            "download_${System.currentTimeMillis()}"
+            "download_${System.currentTimeMillis()}.dat"
         }
     }
 }
