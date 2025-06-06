@@ -115,6 +115,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
                     "Download",
                     "Task $taskId progress: $progress% ($downloadedBytes/$totalBytes)"
                 )
+                mBinding.btnDownloadOkhttp.text= "$progress%"
                 mBinding.progressBar.progress = progress
             }
 
@@ -159,19 +160,14 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
             callback = callback
         )
 
-        downloadManager.addTask(
-            url = url2,
-            filePath = videoDir?.absolutePath + "file2.zip",
-            taskId = "task2",
-            callback = callback2
-        )
+//        downloadManager.addTask(
+//            url = url2,
+//            filePath = videoDir?.absolutePath + "file2.zip",
+//            taskId = "task2",
+//            callback = callback2
+//        )
 
 
-        // 取消任务示例
-        // downloadManager.cancelTask("task1")
-
-        // 取消所有任务示例
-        // downloadManager.cancelAllTasks()
 
         // 获取任务状态示例
         val status = downloadManager.getTaskStatus("task1")
@@ -182,6 +178,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
             downloadManager.cancelTask("task1")
         }
         mBinding.btnPause.setOnClickListener {
+            downloadManager.pauseTask("task1")
         }
     }
 }
