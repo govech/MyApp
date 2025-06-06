@@ -14,7 +14,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
 
     private val mBinding by binding(ActivityDownLoadFromOkhttpBinding::inflate)
 
-    //    private val url = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
+    //    private val url = "https://cdn2.eso.org/images/original/eso1242a.psb"  //24g大图
     private val url1 = "https://media.w3.org/2010/05/sintel/trailer.mp4"
     private val url2 = "https://t-cdn.kaiyanapp.com/7c09fffc63c0122dede7af7dae46dc1b_720P.mp4"
     private val url3 =
