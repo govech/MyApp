@@ -17,7 +17,7 @@ data class DownloadTask(
     val filePath: String,
     val taskId: String,
     var status: DownloadStatus = DownloadStatus.QUEUED,
-    var progress: Int = 0, // 0-100
+    var progress: Double = 0.0,
     var totalBytes: Long = 0,
     var downloadedBytes: Long = 0,
     var supportsRange: Boolean = false // 新增：是否支持Range请求

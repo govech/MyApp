@@ -25,7 +25,7 @@ class CallbackHandler private constructor() {
 
     fun notifyProgress(
         taskId: String,
-        progress: Int,
+        progress: Double,
         downloadedBytes: Long,
         totalBytes: Long,
         callback: DownloadCallback?

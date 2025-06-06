@@ -16,9 +16,11 @@ class FileHandler {
     fun prepareFile(task: DownloadTask): Boolean {
         try {
             val file = File(task.filePath)
-            if (file.freeSpace < task.totalBytes - task.downloadedBytes) {
-                throw IOException("Insufficient disk space for ${task.filePath}")
+            if (StorageUtils.getAvailableInternalStorageSize() < task.totalBytes - task.downloadedBytes) {
+                throw IOException("Insufficient disk space for ${task.filePath}   AvailableInternalStorageSize=${StorageUtils.getAvailableInternalStorageSize()}")
             }
+            Log.d(TAG, "Task ${task.taskId}: getAvailableInternalStorageSize=${StorageUtils.getAvailableInternalStorageSize()}")
+
             val parentDir = file.parentFile
             if (parentDir != null) {
                 if (!parentDir.exists() && !parentDir.mkdirs()) {
@@ -40,7 +42,7 @@ class FileHandler {
     fun writeToFile(
         task: DownloadTask,
         inputStream: java.io.InputStream,
-        onProgress: (Long, Int) -> Unit,
+        onProgress: (Long, Double) -> Unit,
         onComplete: () -> Unit
     ) {
         try {
@@ -64,8 +66,8 @@ class FileHandler {
                     downloadedBytes += bytesRead
                     task.downloadedBytes = downloadedBytes
                     if (task.totalBytes > 0) {
-                        val newProgress =
-                            ((downloadedBytes.toLong() * 100) / task.totalBytes).toInt()
+
+                        val newProgress = String.format("%.2f", (downloadedBytes.toLong() * 100.0) / task.totalBytes).toDouble()
 
                         /**
                          * 当进度变化大于1%或者当前时间间隔超过1秒时，更新进度
@@ -103,7 +105,7 @@ class FileHandler {
         try {
             File(task.filePath).delete()
             task.downloadedBytes = 0
-            task.progress = 0
+            task.progress = 0.0
             Log.d(TAG, "Task ${task.taskId}: Deleted partial file")
             return true
         } catch (e: Exception) {
