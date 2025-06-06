@@ -38,29 +38,38 @@ class NetworkHandler private constructor() {
         Runtime.getRuntime().availableProcessors()
     )
 
-    fun checkRangeSupport(task: DownloadTask, onResult: (Boolean) -> Unit, onError: (String) -> Unit) {
+    fun checkRangeSupport(
+        task: DownloadTask,
+        onResult: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ) {
         executor.execute {
-            try {
-                val headRequest = Request.Builder().url(task.url).head().build()
-                val call = client.newCall(headRequest)
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.e(TAG, "Task ${task.taskId}: Failed to check Range support", e)
-                        onError("Failed to check Range support: ${e.message}")
-                    }
+            val headRequest = Request.Builder().url(task.url).head().build()
+            val call = client.newCall(headRequest)
+            call.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e(TAG, "Task ${task.taskId}: Failed to check Range support", e)
+                    onError("Failed to check Range support: ${e.message}")
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val supportsRange = response.header("Accept-Ranges") == "bytes"
-                        Log.d(TAG, "Task ${task.taskId}: Range support = $supportsRange")
+                override fun onResponse(call: Call, response: Response) {
+                    try {
+                        val acceptRanges = response.header("Accept-Ranges")
+                        val supportRange = acceptRanges == "bytes"
+                        val contentLength = response.header("Content-Length")?.toLongOrNull() ?: -1L
+                        if (supportRange && contentLength <= 0) {
+                            throw IOException("Invalid Content-Length: $contentLength")
+                        }
+                        onResult(supportRange)
+                        Log.d(TAG, "Task ${task.taskId}: Range support = $supportRange")
+                    } finally {
                         response.close()
-                        onResult(supportsRange)
+                        call.cancel()
                     }
-                })
-            } catch (e: Exception) {
-                Log.e(TAG, "Task ${task.taskId}: Failed to check Range support", e)
-                onError("Failed to check Range support: ${e.message}")
-            }
+                }
+            })
         }
+
     }
 
     fun executeDownload(
@@ -108,16 +117,14 @@ class NetworkHandler private constructor() {
 
                         response.body?.let { body ->
                             try {
-                                val totalBytes = if (task.supportsRange && task.downloadedBytes > 0) {
-                                    body.contentLength() + task.downloadedBytes
-                                } else {
-                                    body.contentLength()
-                                }
+                                val totalBytes =
+                                    if (task.supportsRange && task.downloadedBytes > 0) {
+                                        body.contentLength() + task.downloadedBytes
+                                    } else {
+                                        body.contentLength()
+                                    }
                                 task.totalBytes = totalBytes
                                 onProgress(task.downloadedBytes, totalBytes, body.byteStream())
-                                body.byteStream().use { input ->
-                                    onComplete()
-                                }
                             } catch (e: Exception) {
                                 Log.e(TAG, "Task ${task.taskId}: Download failed", e)
                                 onError(e.message ?: "Download failed")
@@ -126,7 +133,10 @@ class NetworkHandler private constructor() {
                             }
                         } ?: run {
                             if (response.code == 206 && task.supportsRange) {
-                                Log.d(TAG, "Task ${task.taskId}: Empty body with 206, checking range")
+                                Log.d(
+                                    TAG,
+                                    "Task ${task.taskId}: Empty body with 206, checking range"
+                                )
                                 onComplete()
                             } else {
                                 Log.e(TAG, "Task ${task.taskId}: Empty response body")

@@ -14,13 +14,14 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
 
     private val mBinding by binding(ActivityDownLoadFromOkhttpBinding::inflate)
 
-    //    private val url = "https://cdn2.eso.org/images/original/eso1242a.psb"  //24g大图
+    private val url = "https://cdn2.eso.org/images/original/eso1242a.psb"  //24g大图
     private val url1 = "https://media.w3.org/2010/05/sintel/trailer.mp4"
     private val url2 = "https://t-cdn.kaiyanapp.com/7c09fffc63c0122dede7af7dae46dc1b_720P.mp4"
     private val url3 =
         "https://github.com/dhewm/dhewm3/releases/download/1.5.4/dhewm3-mods-1.5.4_win32.zip"
     private var downloadId = ""
 
+    private var download_status = DownloadStatus.COMPLETED
 
     //    private val url = "https://github.com/owncloud/android/archive/refs/heads/master.zip"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,12 +116,49 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
                     "Download",
                     "Task $taskId progress: $progress% ($downloadedBytes/$totalBytes)"
                 )
-                mBinding.btnDownloadOkhttp.text= "$progress%"
+                mBinding.btnDownloadOkhttp.text = "$progress%"
                 mBinding.progressBar.progress = progress
             }
 
             override fun onStatusChanged(taskId: String, status: DownloadStatus) {
-                Log.d("Download", "Task $taskId status: $status")
+                Log.d("Download", "onStatusChanged---Task $taskId status: $status")
+                download_status = status
+                when (status) {
+                    DownloadStatus.QUEUED -> {
+                        mBinding.btnDownloadOkhttp.text = "等待中..."
+                        mBinding.btnDownloadOkhttp.isEnabled = false
+                    }
+
+                    DownloadStatus.DOWNLOADING -> {
+                        mBinding.btnDownloadOkhttp.text = "下载中..."
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+
+                    DownloadStatus.COMPLETED -> {
+                        mBinding.btnDownloadOkhttp.text = "下载完成"
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+
+                    DownloadStatus.FAILED -> {
+                        mBinding.btnDownloadOkhttp.text = "下载失败"
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+
+                    DownloadStatus.CANCELLED -> {
+                        mBinding.btnDownloadOkhttp.text = "已取消"
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+
+                    DownloadStatus.PAUSED -> {
+                        mBinding.btnDownloadOkhttp.text = "已暂停"
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+
+                    else -> {
+                        mBinding.btnDownloadOkhttp.text = "未知状态"
+                        mBinding.btnDownloadOkhttp.isEnabled = true
+                    }
+                }
             }
 
             override fun onError(taskId: String, error: String) {
@@ -153,12 +191,12 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
 
 
         // 添加多个下载任务
-        downloadManager.addTask(
-            url = url1,
-            filePath = videoDir?.absolutePath + "file1.zip",
-            taskId = "task1",
-            callback = callback
-        )
+//        downloadManager.addTask(
+//            url = url,
+//            filePath = videoDir?.absolutePath + "file1.zip",
+//            taskId = "task1",
+//            callback = callback
+//        )
 
 //        downloadManager.addTask(
 //            url = url2,
@@ -166,7 +204,6 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
 //            taskId = "task2",
 //            callback = callback2
 //        )
-
 
 
         // 获取任务状态示例
@@ -178,7 +215,49 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
             downloadManager.cancelTask("task1")
         }
         mBinding.btnPause.setOnClickListener {
-            downloadManager.pauseTask("task1")
+            downloadManager.resumeTask("task1")
+        }
+
+        mBinding.btnDownloadOkhttp.setOnClickListener {
+
+            when (download_status) {
+                DownloadStatus.QUEUED -> {
+                }
+
+                DownloadStatus.DOWNLOADING -> {
+                    downloadManager.pauseTask("task1")
+                }
+
+                DownloadStatus.COMPLETED -> {
+                    downloadManager.addTask(
+                        url = url,
+                        filePath = videoDir?.absolutePath + "file1.zip",
+                        taskId = "task1",
+                        callback = callback
+                    )
+                }
+
+                DownloadStatus.FAILED -> {
+                    downloadManager.addTask(
+                        url = url,
+                        filePath = videoDir?.absolutePath + "file1.zip",
+                        taskId = "task1",
+                        callback = callback
+                    )
+                }
+
+                DownloadStatus.CANCELLED -> {
+                    downloadManager.addTask(
+                        url = url,
+                        filePath = videoDir?.absolutePath + "file1.zip",
+                        taskId = "task1",
+                        callback = callback
+                    )
+                }
+                DownloadStatus.PAUSED -> {
+                    downloadManager.resumeTask("task1")
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.newload
 
 import android.util.Log
+import com.google.android.material.color.utilities.MaterialDynamicColors.onError
 
 
 class DownloadManager private constructor() {
@@ -116,26 +117,46 @@ class DownloadManager private constructor() {
                     taskManager.callbacks[task.taskId]
                 )
             },
-            onProgress = { downloadedBytes, totalBytes, inputStream ->
+            onProgress = label@{ downloadedBytes, totalBytes, inputStream ->
+                // 检查任务状态，暂停或取消时不执行文件写入
+                if (task.status == DownloadStatus.PAUSED || task.status == DownloadStatus.CANCELLED) {
+                    Log.d(TAG, "Task ${task.taskId}: Skipped file write due to ${task.status}")
+                    return@label
+                }
                 try {
                     fileHandler.prepareFile(task)
-                    fileHandler.writeToFile(task, inputStream) { newDownloadedBytes, newProgress ->
-                        callbackHandler.notifyProgress(
+                    fileHandler.writeToFile(
+                        task, inputStream,
+                        onProgress = { newDownloadedBytes, newProgress ->
+                            callbackHandler.notifyProgress(
+                                task.taskId,
+                                newProgress,
+                                newDownloadedBytes,
+                                totalBytes,
+                                taskManager.callbacks[task.taskId]
+                            )
+                        },
+                        onComplete = {
+                            callbackHandler.notifyStatusChanged(
+                                task.taskId,
+                                DownloadStatus.COMPLETED,
+                                taskManager.callbacks[task.taskId]
+                            )
+                        })
+
+                } catch (e: Exception) {
+                    // 仅在任务未暂停或取消时标记为失败
+                    if (task.status != DownloadStatus.PAUSED && task.status != DownloadStatus.CANCELLED) {
+                        task.status = DownloadStatus.FAILED
+                        callbackHandler.notifyError(
                             task.taskId,
-                            newProgress,
-                            newDownloadedBytes,
-                            totalBytes,
+                            e.message ?: "File operation failed",
                             taskManager.callbacks[task.taskId]
                         )
+                        taskManager.cleanupTask(task.taskId)
                     }
-                } catch (e: Exception) {
-                    task.status = DownloadStatus.FAILED
-                    callbackHandler.notifyError(
-                        task.taskId,
-                        e.message ?: "File operation failed",
-                        taskManager.callbacks[task.taskId]
-                    )
-                    taskManager.cleanupTask(task.taskId)
+
+
                 }
             },
             onComplete = {
