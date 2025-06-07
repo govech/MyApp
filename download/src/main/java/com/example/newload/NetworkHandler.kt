@@ -35,7 +35,7 @@ class NetworkHandler private constructor() {
         .build()
 
     private val executor: ExecutorService = Executors.newFixedThreadPool(
-        Runtime.getRuntime().availableProcessors()
+        Runtime.getRuntime().availableProcessors().coerceAtMost(4)
     )
 
     fun checkRangeSupport(
@@ -108,6 +108,8 @@ class NetworkHandler private constructor() {
                     }
 
                     override fun onResponse(call: Call, response: Response) {
+                        Log.d(TAG, "Task ${task.taskId}: HTTP ${response.code}, Headers: ${response.headers}")
+                        Log.d(TAG, "Task ${task.taskId}: Content-Length = ${response.header("Content-Length")}, Transfer-Encoding = ${response.header("Transfer-Encoding")}")
                         if (!response.isSuccessful) {
                             Log.e(TAG, "Task ${task.taskId}: HTTP error ${response.code}")
                             onError("HTTP error: ${response.code}")

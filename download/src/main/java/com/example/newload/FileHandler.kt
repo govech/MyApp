@@ -1,5 +1,6 @@
 package com.example.newload
 
+import android.annotation.SuppressLint
 import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
@@ -19,7 +20,10 @@ class FileHandler {
             if (StorageUtils.getAvailableInternalStorageSize() < task.totalBytes - task.downloadedBytes) {
                 throw IOException("Insufficient disk space for ${task.filePath}   AvailableInternalStorageSize=${StorageUtils.getAvailableInternalStorageSize()}")
             }
-            Log.d(TAG, "Task ${task.taskId}: getAvailableInternalStorageSize=${StorageUtils.getAvailableInternalStorageSize()}")
+            Log.d(
+                TAG,
+                "Task ${task.taskId}: getAvailableInternalStorageSize=${StorageUtils.getAvailableInternalStorageSize()}"
+            )
 
             val parentDir = file.parentFile
             if (parentDir != null) {
@@ -39,6 +43,7 @@ class FileHandler {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     fun writeToFile(
         task: DownloadTask,
         inputStream: java.io.InputStream,
@@ -66,14 +71,16 @@ class FileHandler {
                     downloadedBytes += bytesRead
                     task.downloadedBytes = downloadedBytes
                     if (task.totalBytes > 0) {
-
-                        val newProgress = String.format("%.2f", (downloadedBytes.toLong() * 100.0) / task.totalBytes).toDouble()
+                        val newProgress = String.format(
+                            "%.2f",
+                            (downloadedBytes.toLong() * 100.0) / task.totalBytes
+                        ).toDouble()
 
                         /**
                          * 当进度变化大于1%或者当前时间间隔超过1秒时，更新进度
                          */
                         val currentTimestamp = System.currentTimeMillis()
-                        if (newProgress > task.progress + 1 || currentTimestamp - lastUpdateTimestamp >= 1000) {
+                        if (newProgress > task.progress + 1 || currentTimestamp - lastUpdateTimestamp >= 1000 || downloadedBytes >= task.totalBytes) {
                             task.progress = newProgress
                             onProgress(downloadedBytes, newProgress)
                             Log.d(
@@ -82,18 +89,22 @@ class FileHandler {
                             )
                             lastUpdateTimestamp = currentTimestamp // 更新最后更新时间
                         }
-
                     }
                 }
+                output.flush() // 确保缓冲区数据写入磁盘
+                Log.d(TAG, "Task ${task.taskId}: File write completed")
                 // 文件写入完成，调用 onComplete
-                if (task.status != DownloadStatus.PAUSED && task.status != DownloadStatus.CANCELLED) {
+                if (task.status != DownloadStatus.PAUSED && task.status != DownloadStatus.CANCELLED && downloadedBytes == task.totalBytes) {
                     Log.d(TAG, "Task ${task.taskId}: File write completed")
                     onComplete()
                 }
             }
         } catch (e: Exception) {
             if (e is okhttp3.internal.http2.StreamResetException && (task.status == DownloadStatus.PAUSED || task.status == DownloadStatus.CANCELLED)) {
-                Log.e(TAG, "Task ${task.taskId}: Ignored StreamResetException due to PAUSED or CANCELLED state")
+                Log.e(
+                    TAG,
+                    "Task ${task.taskId}: Ignored StreamResetException due to PAUSED or CANCELLED state"
+                )
                 return
             }
             Log.e(TAG, "Task ${task.taskId}: File write failed", e)

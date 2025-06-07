@@ -35,38 +35,59 @@ class DownloadAdapter(
                 DownloadStatus.QUEUED -> {
                     binding.btnAction.text = "Start"
                     binding.btnAction.isEnabled = true
-                    binding.btnAction.setOnClickListener { viewModel.addTask(task.url, task.filePath) }
+                    binding.btnAction.setOnClickListener {
+                        viewModel.addTask(
+                            task.url,
+                            task.filePath
+                        )
+                    }
                 }
+
                 DownloadStatus.DOWNLOADING -> {
                     binding.btnAction.text = "Pause"
                     binding.btnAction.isEnabled = true
                     binding.btnAction.setOnClickListener { viewModel.pauseTask(task.taskId) }
                 }
+
                 DownloadStatus.PAUSED -> {
                     binding.btnAction.text = "Resume"
                     binding.btnAction.isEnabled = true
                     binding.btnAction.setOnClickListener { viewModel.resumeTask(task.taskId) }
                 }
+
                 DownloadStatus.COMPLETED -> {
                     binding.btnAction.text = "Completed"
                     binding.btnAction.isEnabled = false
                 }
+
                 DownloadStatus.FAILED -> {
                     binding.btnAction.text = "Retry"
                     binding.btnAction.isEnabled = true
-                    binding.btnAction.setOnClickListener { viewModel.addTask(task.url, task.filePath) }
+                    binding.btnAction.setOnClickListener {
+                        viewModel.addTask(
+                            task.url,
+                            task.filePath
+                        )
+                    }
                 }
+
                 DownloadStatus.CANCELLED -> {
                     binding.btnAction.text = "Restart"
                     binding.btnAction.isEnabled = true
-                    binding.btnAction.setOnClickListener { viewModel.addTask(task.url, task.filePath) }
+                    binding.btnAction.setOnClickListener {
+                        viewModel.addTask(
+                            task.url,
+                            task.filePath
+                        )
+                    }
                 }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DownloadViewHolder {
-        val binding = ItemDownloadBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemDownloadBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return DownloadViewHolder(binding, viewModel)
     }
 
@@ -81,24 +102,24 @@ class DownloadAdapter(
 
         override fun areContentsTheSame(oldItem: DownloadTask, newItem: DownloadTask): Boolean {
 
-
-            return oldItem.status == newItem.status &&
-                    oldItem.progress == newItem.progress &&
-                    oldItem.downloadedBytes == newItem.downloadedBytes &&
-                    oldItem.totalBytes == newItem.totalBytes
-
+            return oldItem == newItem
+//            return oldItem.status == newItem.status &&
+//                    oldItem.progress == newItem.progress &&
+//                    oldItem.downloadedBytes == newItem.downloadedBytes &&
+//                    oldItem.totalBytes == newItem.totalBytes
 
 
         }
-        override fun getChangePayload(oldItem: DownloadTask, newItem: DownloadTask): Any? {
-            val payloads = mutableListOf<String>()
-            if (oldItem.progress != newItem.progress || oldItem.downloadedBytes != newItem.downloadedBytes || oldItem.totalBytes != newItem.totalBytes) {
-                payloads.add(PAYLOAD_PROGRESS)
-            }
-            if (oldItem.status != newItem.status) {
-                payloads.add(PAYLOAD_STATUS)
-            }
-            return if (payloads.isNotEmpty()) payloads else null
-        }
+
+//        override fun getChangePayload(oldItem: DownloadTask, newItem: DownloadTask): Any? {
+//            val payloads = mutableListOf<String>()
+//            if (oldItem.progress != newItem.progress || oldItem.downloadedBytes != newItem.downloadedBytes || oldItem.totalBytes != newItem.totalBytes) {
+//                payloads.add(PAYLOAD_PROGRESS)
+//            }
+//            if (oldItem.status != newItem.status) {
+//                payloads.add(PAYLOAD_STATUS)
+//            }
+//            return if (payloads.isNotEmpty()) payloads else null
+//        }
     }
 }

@@ -56,7 +56,5 @@ class DownloadRepository {
         downloadManager.cancelTask(taskId)
     }
 
-    fun shutdown() {
-        downloadManager.shutdown()
-    }
+
 }

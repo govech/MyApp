@@ -32,7 +32,7 @@ class CallbackHandler private constructor() {
     ) {
         handler.post {
             callback?.onProgress(taskId, progress, downloadedBytes, totalBytes)
-            Log.d(TAG, "Notified progress for $taskId: $progress%")
+            Log.d(TAG, "Notified progress for $taskId: $progress%  ----$downloadedBytes/$totalBytes")
         }
     }
 

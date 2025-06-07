@@ -7,7 +7,6 @@ import com.example.newload.DownloadTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class DownloadViewModel : ViewModel() {
@@ -17,7 +16,8 @@ class DownloadViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            repository.getDownloadEvents().collect { event ->
+            repository.getDownloadEvents()
+                .collect { event ->
                 updateTask(event)
             }
         }
@@ -44,10 +44,6 @@ class DownloadViewModel : ViewModel() {
         repository.cancelTask(taskId)
     }
 
-    override fun onCleared() {
-        repository.shutdown()
-        super.onCleared()
-    }
 
     private fun updateTask(event: DownloadEvent) {
         val currentTasks = _tasks.value.toMutableList()

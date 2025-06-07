@@ -150,7 +150,7 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
     private fun initRv() {
         val adapter = DownloadAdapter(viewModel)
         mBinding.rvDownload.adapter = adapter
-
+        mBinding.rvDownload.itemAnimator  = null
         lifecycleScope.launch {
             viewModel.tasks.collect { tasks ->
                 adapter.submitList(tasks)
@@ -158,8 +158,8 @@ class DownLoadFromOkhttpActivity : BaseActivity() {
         }
         val videoDir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)
         if (videoDir != null) {
-            for (i in 1..6) {
-                val fileName = "file$i.zip"
+            for (i in 1..8) {
+                val fileName = "file$i.mp4"
                 viewModel.addTask(url1, "$videoDir/$fileName")
             }
         }
